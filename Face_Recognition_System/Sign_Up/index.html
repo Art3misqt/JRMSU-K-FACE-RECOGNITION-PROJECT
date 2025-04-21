@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Create Account</title>
+    <link rel="stylesheet" href="Stylecss.css">
+</head>
+<body>
+    <div class="container">
+        <div class="icon">
+            <img src="jrmsu.png" alt="User Icon">
+        </div>
+        <h2>CREATE NEW ACCOUNT</h2>
+        <form>
+            <div class="input-group">
+                <input type="text" placeholder="Name">
+                <input type="text" placeholder="Surname">
+            </div>
+            <div class="input-group">
+                <input type="text" placeholder="Barangay">
+                <input type="text" placeholder="Purok">
+            </div>
+            <input type="email" placeholder="Email">
+            <input type="password" placeholder="Password">
+
+            <div class="terms">
+                <input type="checkbox" id="terms">
+                <label for="terms">I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.</label>
+            </div>
+
+            <button type="submit">SIGN UP</button>
+        </form>
+    </div>
+
+    <script>
+        document.getElementById("signupForm").addEventListener("submit", function(event) {
+            event.preventDefault(); // Stop form from submitting
+
+            // Get input values
+            const name = document.getElementById("name").value.trim();
+            const surname = document.getElementById("surname").value.trim();
+            const country = document.getElementById("country").value.trim();
+            const city = document.getElementById("city").value.trim();
+            const email = document.getElementById("email").value.trim();
+            const login = document.getElementById("login").value.trim();
+            const password = document.getElementById("password").value.trim();
+            const termsChecked = document.getElementById("terms").checked;
+
+            // Simple validation
+            if (!name || !surname || !country || !city || !email || !login || !password) {
+                alert("Please fill out all fields.");
+                return;
+            }
+
+            if (!termsChecked) {
+                alert("You must agree to the terms and privacy policy.");
+                return;
+            }
+
+            // Simulate success (you could send this to a server here)
+            alert(`Account created successfully!\nWelcome, ${name} ${surname}!`);
+            
+            // Optionally clear form
+            document.getElementById("signupForm").reset();
+        });
+    </script>
+</body>
+</html>
