@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JRMSU FACIAL RECOGNITION IDENTITY SCANNER</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #0056b3;
+            --secondary: #ff6b35;
+            --accent: #00b4d8;
+            --light: #f8f9fa;
+            --dark: #212529;
+        }
+        
+        .chat-container {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            max-width: 100%;
+            margin: 0 auto;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .chat-header {
+            background: linear-gradient(135deg, var(--primary) 0%, #003366 100%);
+            color: white;
+            padding: 1rem;
+            text-align: center;
+            border-radius: 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            border-bottom: 3px solid var(--secondary);
+        }
+        
+        .chat-messages {
+            flex: 1;
+            padding: 1rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            background-color: #f8fafc;
+            background-image: radial-gradient(circle at 10% 20%, rgba(0, 180, 216, 0.05) 0%, rgba(255, 255, 255, 0) 90%);
+        }
+        
+        .message {
+            max-width: 85%;
+            padding: 0.75rem 1rem;
+            border-radius: 1rem;
+            line-height: 1.4;
+            font-size: 0.95rem;
+            word-wrap: break-word;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .user-message {
+            align-self: flex-end;
+            background: linear-gradient(135deg, var(--primary) 0%, #003366 100%);
+            color: white;
+            border-bottom-right-radius: 0.25rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .ai-message {
+            align-self: flex-start;
+            background-color: white;
+            color: var(--dark);
+            border-bottom-left-radius: 0.25rem;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 2px 4px rgba(0, 86, 179, 0.1);
+        }
+        
+        .chat-input-container {
+            padding: 0.75rem;
+            border-top: 1px solid #e2e8f0;
+            background-color: white;
+            background: linear-gradient(to top, #ffffff 0%, #f8f9fa 100%);
+        }
+        
+        .chat-input {
+            display: flex;
+            gap: 0.5rem;
+            align-items: flex-end;
+        }
+        
+        .chat-input textarea {
+            flex: 1;
+            padding: 0.75rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.75rem;
+            resize: none;
+            outline: none;
+            font-family: inherit;
+            font-size: 0.95rem;
+            max-height: 120px;
+            min-height: 40px;
+            background-color: #ffffff;
+            transition: all 0.3s;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+        
+        .chat-input textarea:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(0, 180, 216, 0.2);
+        }
+        
+        .send-button {
+            padding: 0.75rem 1rem;
+            background: linear-gradient(135deg, var(--secondary) 0%, #e85d04 100%);
+            color: white;
+            border: none;
+            border-radius: 0.75rem;
+            cursor: pointer;
+            font-size: 0.95rem;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 40px;
+            width: 40px;
+            box-shadow: 0 2px 4px rgba(255, 107, 53, 0.3);
+        }
+        
+        .send-button:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+            box-shadow: 0 3px 6px rgba(255, 107, 53, 0.4);
+        }
+        
+        .send-button:active {
+            transform: translateY(0);
+            box-shadow: 0 1px 3px rgba(255, 107, 53, 0.3);
+        }
+        
+        .typing-indicator {
+            display: flex;
+            padding: 0.75rem 1rem;
+            background-color: white;
+            border-radius: 1rem;
+            align-self: flex-start;
+            border-bottom-left-radius: 0.25rem;
+            width: fit-content;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .typing-indicator span {
+            height: 8px;
+            width: 8px;
+            background-color: var(--accent);
+            border-radius: 50%;
+            display: inline-block;
+            margin: 0 2px;
+            animation: bounce 1.5s infinite ease-in-out;
+        }
+        
+        .typing-indicator span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+        
+        .typing-indicator span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+        
+        @keyframes bounce {
+            0%, 60%, 100% {
+                transform: translateY(0);
+            }
+            30% {
+                transform: translateY(-4px);
+            }
+        }
+        
+        .info-card {
+            background-color: #f0f9ff;
+            border: 1px solid var(--accent);
+            border-radius: 0.75rem;
+            padding: 0.75rem;
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
+            box-shadow: 0 2px 4px rgba(0, 180, 216, 0.1);
+        }
+        
+        .info-card-title {
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 0.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .info-card-title i {
+            color: var(--secondary);
+        }
+        
+        .suggestions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+        
+        .suggestion-chip {
+            background-color: #e0f2fe;
+            color: var(--primary);
+            padding: 0.35rem 0.85rem;
+            border-radius: 1rem;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid rgba(0, 180, 216, 0.3);
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        }
+        
+        .suggestion-chip:hover {
+            background-color: #bae6fd;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0, 86, 179, 0.1);
+            color: #003366;
+        }
+        
+        .avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 0.5rem;
+            flex-shrink: 0;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+            color: white;
+            font-weight: bold;
+            border: 2px solid white;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .message-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.25rem;
+        }
+        
+        .message-sender {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        
+        .message-time {
+            font-size: 0.75rem;
+            color: #64748b;
+            margin-left: 0.5rem;
+        }
+        
+        /* Gradient border for messages */
+        .user-message {
+            position: relative;
+        }
+        
+        .user-message::before {
+            content: '';
+            position: absolute;
+            top: -1px;
+            right: -1px;
+            bottom: -1px;
+            left: -1px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+            z-index: -1;
+            border-radius: 1rem;
+        }
+        
+        /* Animation for new messages */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .message {
+            animation: fadeInUp 0.3s ease-out;
+        }
+        
+        /* Pulse animation for avatar */
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(0, 180, 216, 0.7);
+            }
+            70% {
+                box-shadow: 0 0 0 10px rgba(0, 180, 216, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(0, 180, 216, 0);
+            }
+        }
+        
+        .avatar.pulse {
+            animation: pulse 1.5s infinite;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .chat-container {
+                height: 100vh;
+            }
+            
+            .message {
+                max-width: 90%;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .chat-input {
+                flex-direction: column;
+            }
+            
+            .send-button {
+                width: 100%;
+                height: auto;
+                padding: 0.5rem;
+            }
+            
+            .chat-header {
+                flex-direction: column;
+                text-align: center;
+                padding: 0.75rem;
+            }
+            
+            .avatar {
+                margin-right: 0;
+                margin-bottom: 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-header">
+            <div class="avatar pulse">JR</div>
+            <div>
+                <h1 class="text-lg font-bold">JRMSU AI Assistant</h1>
+                <p class="text-xs opacity-80">Facial Recognition & Student Services</p>
+            </div>
+        </div>
+        
+        <div class="chat-messages" id="chat-messages">
+            <!-- Messages will appear here -->
+        </div>
+        
+        <div class="chat-input-container">
+            <div class="chat-input">
+                <textarea id="user-input" placeholder="Ask about JRMSU services, facial recognition, or student information..." rows="1"></textarea>
+                <button id="send-button" class="send-button">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+            <div class="suggestions mt-2">
+                <div class="suggestion-chip" onclick="quickQuestion('How does the facial recognition system work?')">
+                    <i class="fas fa-camera mr-1"></i> Facial Recognition
+                </div>
+                <div class="suggestion-chip" onclick="quickQuestion('What are the admission requirements?')">
+                    <i class="fas fa-graduation-cap mr-1"></i> Admissions
+                </div>
+                <div class="suggestion-chip" onclick="quickQuestion('Where can I find my grades?')">
+                    <i class="fas fa-user-graduate mr-1"></i> Student Portal
+                </div>
+                <div class="suggestion-chip" onclick="quickQuestion('What courses does JRMSU offer?')">
+                    <i class="fas fa-book mr-1"></i> Courses
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Audio elements for sound notifications -->
+    <audio id="messageSentSound" preload="auto">
+        <source src="https://assets.mixkit.co/sfx/preview/mixkit-arcade-game-jump-coin-216.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="messageReceivedSound" preload="auto">
+        <source src="https://assets.mixkit.co/sfx/preview/mixkit-correct-answer-tone-2870.mp3" type="audio/mpeg">
+    </audio>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const chatMessages = document.getElementById('chat-messages');
+            const userInput = document.getElementById('user-input');
+            const sendButton = document.getElementById('send-button');
+            const sentSound = document.getElementById('messageSentSound');
+            const receivedSound = document.getElementById('messageReceivedSound');
+            
+            // Auto-resize textarea as user types
+            userInput.addEventListener('input', function() {
+                this.style.height = 'auto';
+                this.style.height = (this.scrollHeight) + 'px';
+            });
+            
+            // Send message when button is clicked or Enter is pressed
+            sendButton.addEventListener('click', sendMessage);
+            userInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendMessage();
+                }
+            });
+            
+            // Knowledge base for JRMSU
+            const jrmsuKnowledgeBase = {
+                "facial recognition": {
+                    answer: "The JRMSU Facial Recognition System is used for identity verification across campus. It helps with attendance tracking, secure access to facilities, and student authentication. To use it, simply look at the camera at designated scanning points.",
+                    followup: ["How accurate is the system?", "Where are the scanning locations?", "Can I opt out of facial recognition?"]
+                },
+                "admission requirements": {
+                    answer: "JRMSU admission requirements vary by program. Generally, you'll need: 1) Completed application form, 2) High school report card, 3) Good moral certificate, 4) 2x2 ID photos, and 5) Passing the entrance exam. Some programs may have additional requirements.",
+                    followup: ["What's the application deadline?", "Is there an entrance exam fee?", "What programs are available?"]
+                },
+                "student portal": {
+                    answer: "The JRMSU Student Portal (https://portal.jrmsu.edu.ph) allows you to: view grades, check schedules, register for classes, pay fees, and access online learning materials. Use your student ID and password to login.",
+                    followup: ["I forgot my password", "How to view my grades?", "Portal not working"]
+                },
+                "courses offered": {
+                    answer: "JRMSU offers various undergraduate and graduate programs across its campuses. Main categories include: Education, Engineering, IT, Business, Agriculture, Nursing, and Arts & Sciences. Visit our website for the complete program list.",
+                    followup: ["What's the best program?", "Scholarships available?", "Online courses offered?"]
+                },
+                "contact information": {
+                    answer: "You can contact JRMSU through:\nMain Campus: (062) 991-1027\nEmail: info@jrmsu.edu.ph\nAddress: Zamboanga del Norte, Philippines\nFor specific departments, visit our Contact Us page.",
+                    followup: ["Registrar office number", "Admissions email", "Library hours"]
+                },
+                "facial recognition locations": {
+                    answer: "Facial recognition scanners are located at:\n1) Main campus entrances\n2) Library entrance\n3) Computer labs\n4) Examination halls\n5) Selected classrooms\nScans are quick and take less than 2 seconds.",
+                    followup: ["What if it doesn't recognize me?", "Is my data secure?", "Why is it required?"]
+                },
+                "academic calendar": {
+                    answer: "The JRMSU academic calendar typically follows:\n1st Semester: June - October\n2nd Semester: November - March\nSummer Term: April - May\nExact dates vary each year. Check the official calendar on the website.",
+                    followup: ["Enrollment period", "Holidays observed", "Final exam schedule"]
+                },
+                "tuition fees": {
+                    answer: "Tuition fees at JRMSU vary by program and student status. On average:\n- Undergraduate: ₱5,000-₱10,000 per semester\n- Graduate: ₱7,000-₱15,000 per semester\nFinancial aid and scholarships are available for qualified students.",
+                    followup: ["Payment options", "Scholarship requirements", "Installment plans"]
+                },
+                "library hours": {
+                    answer: "JRMSU Library Hours:\nMonday-Friday: 8:00 AM - 7:00 PM\nSaturday: 9:00 AM - 5:00 PM\nSunday: Closed\nSpecial hours during holidays and semester breaks.",
+                    followup: ["Online resources", "Borrowing policies", "Study rooms"]
+                }
+            };
+            
+            // Common greetings and responses
+            const greetings = [
+                "Hello! I'm the JRMSU AI Assistant. How can I help you today?",
+                "Hi there! What JRMSU-related questions can I answer for you?",
+                "Welcome to JRMSU's virtual assistant. Ask me about admissions, student services, or our facial recognition system."
+            ];
+            
+            const fallbackResponses = [
+                "I'm not sure about that. Would you like me to connect you with a human representative?",
+                "That's an interesting question. For specific inquiries, please contact the JRMSU administration office.",
+                "I'm still learning about all JRMSU services. Could you rephrase your question or ask about something else?",
+                "For that information, I recommend checking the official JRMSU website or contacting the relevant department."
+            ];
+            
+            function quickQuestion(question) {
+                userInput.value = question;
+                sendMessage();
+            }
+            
+            function sendMessage() {
+                const message = userInput.value.trim();
+                if (message === '') return;
+                
+                // Add user message to chat
+                addMessage('user', message);
+                userInput.value = '';
+                userInput.style.height = 'auto';
+                
+                // Play sent sound
+                sentSound.currentTime = 0;
+                sentSound.play();
+                
+                // Show typing indicator
+                const typingIndicator = document.createElement('div');
+                typingIndicator.className = 'message ai-message typing-indicator';
+                typingIndicator.innerHTML = '<span></span><span></span><span></span>';
+                chatMessages.appendChild(typingIndicator);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+                
+                // Process the message and generate response
+                setTimeout(() => {
+                    // Remove typing indicator
+                    chatMessages.removeChild(typingIndicator);
+                    
+                    // Generate response
+                    const response = generateResponse(message);
+                    addMessage('ai', response);
+                    
+                    // Play received sound
+                    receivedSound.currentTime = 0;
+                    receivedSound.play();
+                }, 1000 + Math.random() * 1000); // Simulate thinking time
+            }
+            
+            function generateResponse(userMessage) {
+                const lowerMessage = userMessage.toLowerCase();
+                
+                // Check for greetings
+                if (lowerMessage.includes('hello') || lowerMessage.includes('hi') || lowerMessage.includes('hey')) {
+                    return greetings[Math.floor(Math.random() * greetings.length)];
+                }
+                
+                // Check for thank you
+                if (lowerMessage.includes('thank')) {
+                    return "You're welcome! Is there anything else I can help you with regarding JRMSU?";
+                }
+                
+                // Check knowledge base
+                for (const [keyword, data] of Object.entries(jrmsuKnowledgeBase)) {
+                    if (lowerMessage.includes(keyword)) {
+                        let response = data.answer;
+                        
+                        // Add followup suggestions if available
+                        if (data.followup && data.followup.length > 0) {
+                            response += "\n\n<div class='info-card'><div class='info-card-title'><i class='fas fa-lightbulb'></i> Related Questions</div>";
+                            response += "<div class='suggestions'>";
+                            data.followup.forEach(q => {
+                                response += `<div class="suggestion-chip" onclick="quickQuestion('${q}')">${q}</div>`;
+                            });
+                            response += "</div></div>";
+                        }
+                        
+                        return response;
+                    }
+                }
+                
+                // Simulate API call with timeout
+                const fallback = fallbackResponses[Math.floor(Math.random() * fallbackResponses.length)];
+                
+                // Format as if it came from an API
+                return `${fallback}\n\n<div class='info-card'><div class='info-card-title'><i class='fas fa-phone-alt'></i> Immediate Assistance</div>For immediate help, you can:<br>1) Call (062) 991-1027<br>2) Email info@jrmsu.edu.ph<br>3) Visit the administration office</div>`;
+            }
+        
+            function addMessage(sender, text) {
+                const messageElement = document.createElement('div');
+                messageElement.className = `message ${sender}-message`;
+                
+                // Get current time
+                const now = new Date();
+                const timeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                
+                // Create message header
+                let messageContent;
+                if (sender === 'user') {
+                    messageContent = `
+                        <div class="message-header">
+                            <div class="message-sender">You</div>
+                            <div class="message-time">${timeString}</div>
+                        </div>
+                        <div>${text}</div>
+                    `;
+                } else {
+                    messageContent = `
+                        <div class="message-header">
+                            <div class="avatar">JR</div>
+                            <div class="message-sender">JRMSU Assistant</div>
+                            <div class="message-time">${timeString}</div>
+                        </div>
+                        <div>${text}</div>
+                    `;
+                }
+                
+                messageElement.innerHTML = messageContent;
+                chatMessages.appendChild(messageElement);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+            
+            // Initial greeting
+            setTimeout(() => {
+                const greeting = greetings[Math.floor(Math.random() * greetings.length)];
+                addMessage('ai', greeting);
+                
+                // Add welcome card with quick actions
+                const welcomeCard = `
+                    <div class="info-card">
+                        <div class="info-card-title"><i class="fas fa-bolt"></i> Quick Actions</div>
+                        <div class="suggestions">
+                            <div class="suggestion-chip" onclick="quickQuestion('How does the facial recognition system work?')">
+                                <i class="fas fa-camera mr-1"></i> Facial Recognition
+                            </div>
+                            <div class="suggestion-chip" onclick="quickQuestion('What are the admission requirements?')">
+                                <i class="fas fa-graduation-cap mr-1"></i> Admissions
+                            </div>
+                            <div class="suggestion-chip" onclick="quickQuestion('Where can I find my grades?')">
+                                <i class="fas fa-user-graduate mr-1"></i> Student Portal
+                            </div>
+                            <div class="suggestion-chip" onclick="quickQuestion('What scholarships are available?')">
+                                <i class="fas fa-award mr-1"></i> Scholarships
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                addMessage('ai', welcomeCard);
+                
+                // Play initial greeting sound
+                receivedSound.currentTime = 0;
+                receivedSound.play();
+            }, 500);
+            
+            // Expose quickQuestion to global scope for the suggestion chips
+            window.quickQuestion = quickQuestion;
+        });
+    </script>
+</body>
+</html>
